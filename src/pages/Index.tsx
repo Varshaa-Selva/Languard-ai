@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   User,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
@@ -19,7 +20,10 @@ import SatelliteMonitoring from "@/components/SatelliteMonitoring";
 import AdminDashboard from "@/components/AdminDashboard";
 import DashboardOverview from "@/components/DashboardOverview";
 import ElevationAnalysis from "@/components/ElevationAnalysis";
-import { BlockchainRecord, SEED_RECORDS } from "@/lib/mockData";
+import CitizenDashboard from "@/components/CitizenDashboard";
+import NewApplicationFlow from "@/components/NewApplicationFlow";
+import CitizenApplicationDetail from "@/components/CitizenApplicationDetail";
+import { BlockchainRecord, SEED_RECORDS, CitizenApplication, MOCK_CITIZEN_APPLICATIONS } from "@/lib/mockData";
 import { pageTransition } from "@/lib/animations";
 
 type Tab =
@@ -29,7 +33,9 @@ type Tab =
   | "elevation"
   | "audit";
 
-type Role = "admin" | "officer";
+type CitizenView = "dashboard" | "newApplication" | "applicationDetail";
+
+type Role = "admin" | "officer" | "citizen";
 
 const tabs: { id: Tab; label: string; icon: typeof Shield }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -47,15 +53,122 @@ const Index = () => {
   const [role, setRole] = useState<Role>("admin");
   const { theme, toggleTheme } = useTheme();
 
+  // Citizen portal state
+  const [citizenView, setCitizenView] = useState<CitizenView>("dashboard");
+  const [citizenApplications, setCitizenApplications] = useState<CitizenApplication[]>(MOCK_CITIZEN_APPLICATIONS);
+  const [selectedApplication, setSelectedApplication] = useState<CitizenApplication | null>(null);
+
   const handleDecision = (record: BlockchainRecord) => {
     setRecords((prev) => [record, ...prev]);
     setLastApproval(record.decision === "APPROVED");
   };
 
-  const toggleRole = () => {
-    setRole((prev) => (prev === "admin" ? "officer" : "admin"));
+  const handleCitizenApplicationSubmit = (application: CitizenApplication) => {
+    setCitizenApplications((prev) => [application, ...prev]);
+    setCitizenView("dashboard");
   };
 
+  const handleViewApplicationDetail = (application: CitizenApplication) => {
+    setSelectedApplication(application);
+    setCitizenView("applicationDetail");
+  };
+
+  const cycleRole = () => {
+    setRole((prev) => {
+      if (prev === "admin") return "officer";
+      if (prev === "officer") return "citizen";
+      return "admin";
+    });
+    // Reset views when switching roles
+    if (role === "citizen") {
+      setCitizenView("dashboard");
+    }
+  };
+
+  // If citizen role, show citizen portal
+  if (role === "citizen") {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Citizen Header */}
+        <header className="sticky top-0 z-40 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-base font-bold tracking-wide">LANDGUARD AI</h1>
+                <p className="text-[10px] text-muted-foreground tracking-widest uppercase">
+                  Citizen Portal
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="gap-2"
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={cycleRole}
+                className="gap-2"
+              >
+                <Users className="w-4 h-4" />
+                <span className="capitalize">{role}</span>
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Citizen Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <AnimatePresence mode="wait">
+            {citizenView === "dashboard" && (
+              <CitizenDashboard
+                applications={citizenApplications}
+                onNewApplication={() => setCitizenView("newApplication")}
+                onViewDetails={handleViewApplicationDetail}
+              />
+            )}
+            {citizenView === "newApplication" && (
+              <NewApplicationFlow
+                onSubmit={handleCitizenApplicationSubmit}
+                onCancel={() => setCitizenView("dashboard")}
+              />
+            )}
+            {citizenView === "applicationDetail" && selectedApplication && (
+              <CitizenApplicationDetail
+                application={selectedApplication}
+                onBack={() => setCitizenView("dashboard")}
+                onApplyAgain={() => setCitizenView("newApplication")}
+              />
+            )}
+          </AnimatePresence>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-border mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            <p className="text-xs text-muted-foreground text-center">
+              © 2026 LandGuard AI - Government of India. All rights reserved.
+            </p>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Admin/Officer view
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
@@ -90,8 +203,8 @@ const Index = () => {
                   setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
-                    ? "bg-primary/10 text-primary border border-primary/30"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  ? "bg-primary/10 text-primary border border-primary/30"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -104,11 +217,11 @@ const Index = () => {
           <div className="p-4 border-t border-border space-y-2">
             {/* Role Toggle */}
             <button
-              onClick={toggleRole}
+              onClick={cycleRole}
               className="w-full flex items-center justify-between px-4 py-2 rounded-lg text-sm bg-secondary hover:bg-secondary/80 transition-colors"
             >
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
+                <Users className="w-4 h-4" />
                 <span className="capitalize">{role}</span>
               </div>
               <span className="text-xs text-muted-foreground">Switch</span>
@@ -202,7 +315,7 @@ const Index = () => {
                 exit="exit"
                 variants={pageTransition}
               >
-                {activeTab === "dashboard" && <DashboardOverview records={records} />}
+                {activeTab === "dashboard" && <DashboardOverview records={records} citizenApplications={citizenApplications} />}
                 {activeTab === "approval" && (
                   <LandApproval onDecision={handleDecision} />
                 )}

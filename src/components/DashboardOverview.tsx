@@ -9,6 +9,7 @@ import {
     TrendingUp,
     TrendingDown,
     Activity,
+    IndianRupee,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -26,11 +27,12 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
-import { BlockchainRecord, SEED_MONITORING_SCANS } from "@/lib/mockData";
+import { BlockchainRecord, SEED_MONITORING_SCANS, CitizenApplication, calculateTotalRevenue } from "@/lib/mockData";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 
 interface DashboardOverviewProps {
     records: BlockchainRecord[];
+    citizenApplications?: CitizenApplication[];
 }
 
 // Mock monthly data for trend chart
@@ -66,11 +68,14 @@ const COLORS = {
     rejected: "hsl(0, 72%, 51%)",
 };
 
-const DashboardOverview = ({ records }: DashboardOverviewProps) => {
+const DashboardOverview = ({ records, citizenApplications = [] }: DashboardOverviewProps) => {
     const approved = records.filter((r) => r.decision === "APPROVED").length;
     const rejected = records.filter((r) => r.decision === "REJECTED").length;
     const flaggedScans = SEED_MONITORING_SCANS.filter((s) => s.flagged);
     const highRiskScans = SEED_MONITORING_SCANS.filter((s) => s.riskScore > 70);
+
+    // Calculate total revenue from citizen applications
+    const totalRevenue = calculateTotalRevenue(citizenApplications);
 
     // Calculate risk distribution
     const lowRisk = SEED_MONITORING_SCANS.filter((s) => s.riskScore <= 30).length;
@@ -97,7 +102,7 @@ const DashboardOverview = ({ records }: DashboardOverviewProps) => {
         >
             {/* Statistics Cards */}
             <motion.div
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4"
                 variants={staggerContainer}
             >
                 <StatCard
@@ -140,6 +145,14 @@ const DashboardOverview = ({ records }: DashboardOverviewProps) => {
                     label="Active Zones"
                     value={4}
                     color="text-primary"
+                />
+                <StatCard
+                    icon={IndianRupee}
+                    label="Total Revenue"
+                    value={totalRevenue}
+                    trend={15}
+                    color="text-success"
+                    isCurrency
                 />
             </motion.div>
 
@@ -289,8 +302,8 @@ const DashboardOverview = ({ records }: DashboardOverviewProps) => {
                                     </div>
                                     <span
                                         className={`text-xs px-2 py-1 rounded font-medium ${record.decision === "APPROVED"
-                                                ? "status-approved"
-                                                : "status-rejected"
+                                            ? "status-approved"
+                                            : "status-rejected"
                                             }`}
                                     >
                                         {record.decision}
@@ -328,8 +341,8 @@ const DashboardOverview = ({ records }: DashboardOverviewProps) => {
                                     <div className="text-right flex-shrink-0">
                                         <p
                                             className={`text-sm font-bold font-mono ${scan.riskScore > 70
-                                                    ? "text-destructive"
-                                                    : "text-warning"
+                                                ? "text-destructive"
+                                                : "text-warning"
                                                 }`}
                                         >
                                             {scan.riskScore}
@@ -353,9 +366,10 @@ interface StatCardProps {
     trend?: number;
     percentage?: number;
     color: string;
+    isCurrency?: boolean;
 }
 
-const StatCard = ({ icon: Icon, label, value, trend, percentage, color }: StatCardProps) => {
+const StatCard = ({ icon: Icon, label, value, trend, percentage, color, isCurrency = false }: StatCardProps) => {
     const [displayValue, setDisplayValue] = useState(0);
 
     useEffect(() => {
@@ -377,6 +391,13 @@ const StatCard = ({ icon: Icon, label, value, trend, percentage, color }: StatCa
         return () => clearInterval(timer);
     }, [value]);
 
+    const formatValue = (val: number) => {
+        if (isCurrency) {
+            return `₹${val.toLocaleString("en-IN")}`;
+        }
+        return val.toString();
+    };
+
     return (
         <motion.div variants={staggerItem}>
             <Card className="p-4 space-y-2 hover:bg-secondary/50 transition-colors">
@@ -385,8 +406,8 @@ const StatCard = ({ icon: Icon, label, value, trend, percentage, color }: StatCa
                     <span className="text-xs text-muted-foreground">{label}</span>
                 </div>
                 <div className="flex items-end justify-between">
-                    <p className={`text-2xl font-bold font-mono ${color} animate-count-up`}>
-                        {displayValue}
+                    <p className={`text-2xl font-bold ${isCurrency ? "" : "font-mono"} ${color} animate-count-up`}>
+                        {formatValue(displayValue)}
                     </p>
                     {trend !== undefined && (
                         <div className="flex items-center gap-1 text-xs">
