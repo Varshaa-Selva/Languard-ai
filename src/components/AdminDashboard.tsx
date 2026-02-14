@@ -21,46 +21,40 @@ const AdminDashboard = ({ records }: AdminDashboardProps) => {
   const filteredRecords = filter === "approved"
     ? records.filter(r => r.decision === "APPROVED")
     : filter === "rejected"
-    ? records.filter(r => r.decision === "REJECTED")
-    : filter === "all"
-    ? records
-    : [];
+      ? records.filter(r => r.decision === "REJECTED")
+      : filter === "all"
+        ? records
+        : [];
 
   const showScanData = filter === "flagged" || filter === "high-risk";
   const displayedScans = filter === "flagged" ? flaggedScans : filter === "high-risk" ? highRiskScans : [];
 
-  const downloadReport = () => {
-    const lines = [
-      "LANDGUARD AI — COMPLIANCE REPORT",
-      `Generated: ${new Date().toLocaleString()}`,
-      "=".repeat(50),
-      `Total Applications: ${records.length}`,
-      `Approved: ${approved}`,
-      `Rejected: ${rejected}`,
-      `Flagged Constructions: ${flaggedScans.length}`,
-      `High Risk Alerts: ${highRiskScans.length}`,
-      "",
-      "AUDIT TRAIL",
-      "-".repeat(50),
-      ...records.map(
-        (r) => `[${new Date(r.timestamp).toLocaleString()}] ${r.ownerName} | ${r.surveyNumber} | ${r.decision} | TX: ${r.transactionId}`
-      ),
-      "",
-      "FLAGGED CONSTRUCTIONS",
-      "-".repeat(50),
-      ...flaggedScans.map(
-        (s) => `[${s.scanDate}] ${s.id} | ${s.surveyNumber} | ${s.location} | Risk: ${s.riskScore} | ${s.flagReason}`
-      ),
-      "",
-      `SHA-256 hashes logged for immutable record.`,
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `landguard-report-${Date.now()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadReport = async () => {
+    const { generateComplianceReport } = await import("@/lib/pdfGenerator");
+
+    const reportData = {
+      totalApplications: records.length,
+      approved,
+      rejected,
+      flagged: flaggedScans.length,
+      highRisk: highRiskScans.length,
+      records: records.map(r => ({
+        transactionId: r.transactionId,
+        timestamp: r.timestamp,
+        ownerName: r.ownerName,
+        surveyNumber: r.surveyNumber,
+        decision: r.decision,
+      })),
+      scans: SEED_MONITORING_SCANS.map(s => ({
+        id: s.id,
+        surveyNumber: s.surveyNumber,
+        location: s.location,
+        riskScore: s.riskScore,
+        flagged: s.flagged,
+      })),
+    };
+
+    await generateComplianceReport(reportData);
   };
 
   const handleStatClick = (type: FilterType) => {

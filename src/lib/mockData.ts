@@ -135,12 +135,235 @@ export function runElevationAnalysis(): ElevationData {
   const oldElevation = Math.round(Math.random() * 50 + 100);
   const newDiff = Math.round(Math.random() * 20 - 5);
   const newElevation = oldElevation + newDiff;
+  const difference = Math.abs(newDiff);
   return {
     oldElevation,
     newElevation,
-    difference: Math.abs(newDiff),
-    verticalConstruction: Math.abs(newDiff) > 5,
+    difference,
+    verticalConstruction: difference > 5,
   };
+}
+
+// ==================== CITIZEN PORTAL DATA ====================
+
+export type ApplicationStatus = "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "PAYMENT_PENDING";
+export type PaymentMethod = "UPI" | "CARD" | "NET_BANKING";
+
+export interface PaymentInfo {
+  transactionId: string;
+  amount: number;
+  method: PaymentMethod;
+  timestamp: string;
+  status: "SUCCESS" | "PENDING" | "FAILED";
+}
+
+export interface CitizenApplication {
+  applicationId: string;
+  submittedAt: string;
+  status: ApplicationStatus;
+
+  // Land details
+  ownerName: string;
+  surveyNumber: string;
+  plotArea: number;
+  location: string;
+  coordinates: string;
+  zoneType: string;
+  proposedFloors: number;
+  hasBasement: boolean;
+
+  // Payment
+  payment: PaymentInfo;
+
+  // Compliance results (filled after review)
+  complianceResult?: {
+    decision: "APPROVED" | "REJECTED" | "NEEDS_REVIEW";
+    riskScore: number;
+    violatedRules: string[];
+    officerRemarks?: string;
+  };
+
+  // Blockchain
+  blockchainHash?: string;
+}
+
+// Fee calculation based on plot size, floors, and zone
+export function calculateApplicationFee(
+  plotArea: number,
+  proposedFloors: number,
+  zoneType: string
+): number {
+  let baseFee = 500;
+
+  // Zone-based multiplier
+  const zoneMultiplier: Record<string, number> = {
+    "Residential": 1.0,
+    "Commercial": 1.5,
+    "Airport Zone": 2.0,
+    "Eco Zone": 1.8,
+  };
+
+  // Plot size factor
+  if (plotArea > 5000) baseFee += 500;
+  else if (plotArea > 3000) baseFee += 300;
+  else if (plotArea > 1500) baseFee += 150;
+
+  // Floors factor
+  baseFee += proposedFloors * 100;
+
+  // Apply zone multiplier
+  const multiplier = zoneMultiplier[zoneType] || 1.0;
+
+  return Math.round(baseFee * multiplier);
+}
+
+// Mock citizen applications
+export const MOCK_CITIZEN_APPLICATIONS: CitizenApplication[] = [
+  {
+    applicationId: "APP-2026-001",
+    submittedAt: "2026-01-15T10:30:00.000Z",
+    status: "APPROVED",
+    ownerName: "Ramesh Kumar",
+    surveyNumber: "SY/2026/0001",
+    plotArea: 2000,
+    location: "Bangalore, Karnataka",
+    coordinates: "12.9716° N, 77.5946° E",
+    zoneType: "Residential",
+    proposedFloors: 3,
+    hasBasement: false,
+    payment: {
+      transactionId: "PAY-TXN-001-ABC123",
+      amount: 800,
+      method: "UPI",
+      timestamp: "2026-01-15T10:25:00.000Z",
+      status: "SUCCESS",
+    },
+    complianceResult: {
+      decision: "APPROVED",
+      riskScore: 15,
+      violatedRules: [],
+      officerRemarks: "All regulations met. Approved for construction.",
+    },
+    blockchainHash: "0x7a8f9c2e4b6d8a0f2c4e6b8d0a2f4c6e8b0d2a4f",
+  },
+  {
+    applicationId: "APP-2026-002",
+    submittedAt: "2026-01-18T14:20:00.000Z",
+    status: "REJECTED",
+    ownerName: "Priya Sharma",
+    surveyNumber: "SY/2026/0002",
+    plotArea: 1500,
+    location: "Chennai, Tamil Nadu",
+    coordinates: "13.0827° N, 80.2707° E",
+    zoneType: "Airport Zone",
+    proposedFloors: 5,
+    hasBasement: true,
+    payment: {
+      transactionId: "PAY-TXN-002-DEF456",
+      amount: 1500,
+      method: "CARD",
+      timestamp: "2026-01-18T14:15:00.000Z",
+      status: "SUCCESS",
+    },
+    complianceResult: {
+      decision: "REJECTED",
+      riskScore: 85,
+      violatedRules: ["Exceeds max floors for Airport Zone (3)", "Basement not allowed in this zone"],
+      officerRemarks: "Application violates height restrictions near airport. Rejected.",
+    },
+    blockchainHash: "0x3c5e7a9f1b3d5c7e9a1f3b5d7c9e1a3f5b7d9c1e",
+  },
+  {
+    applicationId: "APP-2026-003",
+    submittedAt: "2026-02-01T09:45:00.000Z",
+    status: "UNDER_REVIEW",
+    ownerName: "Amit Patel",
+    surveyNumber: "SY/2026/0003",
+    plotArea: 4500,
+    location: "Mumbai, Maharashtra",
+    coordinates: "19.0760° N, 72.8777° E",
+    zoneType: "Commercial",
+    proposedFloors: 6,
+    hasBasement: true,
+    payment: {
+      transactionId: "PAY-TXN-003-GHI789",
+      amount: 1350,
+      method: "NET_BANKING",
+      timestamp: "2026-02-01T09:40:00.000Z",
+      status: "SUCCESS",
+    },
+  },
+  {
+    applicationId: "APP-2026-004",
+    submittedAt: "2026-02-05T16:10:00.000Z",
+    status: "APPROVED",
+    ownerName: "Lakshmi Iyer",
+    surveyNumber: "SY/2026/0004",
+    plotArea: 3200,
+    location: "Hyderabad, Telangana",
+    coordinates: "17.3850° N, 78.4867° E",
+    zoneType: "Residential",
+    proposedFloors: 4,
+    hasBasement: true,
+    payment: {
+      transactionId: "PAY-TXN-004-JKL012",
+      amount: 950,
+      method: "UPI",
+      timestamp: "2026-02-05T16:05:00.000Z",
+      status: "SUCCESS",
+    },
+    complianceResult: {
+      decision: "APPROVED",
+      riskScore: 20,
+      violatedRules: [],
+      officerRemarks: "Compliant with all residential zone regulations.",
+    },
+    blockchainHash: "0x9e1a3c5f7b9d1e3a5c7f9b1d3e5a7c9f1b3d5e7a",
+  },
+  {
+    applicationId: "APP-2026-005",
+    submittedAt: "2026-02-10T11:30:00.000Z",
+    status: "UNDER_REVIEW",
+    ownerName: "Vikram Singh",
+    surveyNumber: "SY/2026/0005",
+    plotArea: 2800,
+    location: "Delhi",
+    coordinates: "28.7041° N, 77.1025° E",
+    zoneType: "Residential",
+    proposedFloors: 5,
+    hasBasement: false,
+    payment: {
+      transactionId: "PAY-TXN-005-MNO345",
+      amount: 1000,
+      method: "CARD",
+      timestamp: "2026-02-10T11:25:00.000Z",
+      status: "SUCCESS",
+    },
+  },
+];
+
+// Calculate total revenue from all applications
+export function calculateTotalRevenue(applications: CitizenApplication[]): number {
+  return applications.reduce((total, app) => {
+    if (app.payment.status === "SUCCESS") {
+      return total + app.payment.amount;
+    }
+    return total;
+  }, 0);
+}
+
+// Generate application ID
+export function generateApplicationId(): string {
+  const year = new Date().getFullYear();
+  const random = Math.floor(Math.random() * 9000) + 1000;
+  return `APP-${year}-${random.toString().padStart(3, '0')}`;
+}
+
+// Generate payment transaction ID
+export function generatePaymentTransactionId(): string {
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const timestamp = Date.now().toString(36).toUpperCase();
+  return `PAY-TXN-${timestamp}-${random}`;
 }
 
 export function calculateRiskScore(
