@@ -3,24 +3,125 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>LandGuard AI</title>
+    <meta name="description" content="Intelligent Land Verification System" />
+    <meta name="author" content="LandGuard AI Team" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="LandGuard AI" />
+    <meta property="og:description" content="Intelligent Land Verification System" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="/favicon.svg" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:site" content="@LandGuardAI" />
+    <meta name="twitter:image" content="/favicon.svg" />
+    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+      
+      body {
+        font-family: 'Patrick Hand', cursive;
+        background-color: #f8f4e1;
+        background-image: 
+          radial-gradient(#d4c8a8 1px, transparent 1px),
+          radial-gradient(#d4c8a8 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: 0 0, 10px 10px;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        color: #2c1810;
+      }
+      
+      #root {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 
+          0 0 0 3px #e8dcc4,
+          0 0 0 6px #d4c8a8,
+          10px 10px 0 rgba(0,0,0,0.1);
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      #root::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+          repeating-linear-gradient(
+            transparent,
+            transparent 24px,
+            rgba(189, 167, 117, 0.1) 25px
+          );
+        pointer-events: none;
+      }
+      
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Patrick Hand', cursive;
+        color: #8b4513;
+        text-shadow: 2px 2px 0px rgba(139, 69, 19, 0.1);
+      }
+      
+      button, input, select, textarea {
+        font-family: 'Patrick Hand', cursive;
+        border: 2px solid #d4c8a8;
+        border-radius: 8px;
+        background: #fff9e6;
+        padding: 8px 12px;
+        transition: all 0.2s ease;
+      }
+      
+      button:hover, input:hover, select:hover, textarea:hover {
+        background: #fff0cc;
+        border-color: #c1b086;
+        transform: translateY(-1px);
+        box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+      }
+      
+      button:active {
+        transform: translateY(0);
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+      }
+      
+      .handwritten-note {
+        position: absolute;
+        background: #ffefd5;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px dashed #d2691e;
+        font-size: 14px;
+        transform: rotate(-2deg);
+        box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+        max-width: 200px;
+      }
+      
+      .handwritten-note::before {
+        content: '📝';
+        margin-right: 5px;
+      }
+    </style>
   </head>
 
   <body>
     <div id="root"></div>
+    
+    <!-- Handwritten notes decoration -->
+    <div class="handwritten-note" style="top: 50px; right: 50px;">
+      Welcome to LandGuard AI! 🌍
+    </div>
+    
+    <div class="handwritten-note" style="bottom: 100px; left: 50px; transform: rotate(3deg);">
+      Smart land verification system
+    </div>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

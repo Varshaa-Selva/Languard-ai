@@ -1,56 +1,21 @@
-# Welcome to your Lovable project
+# LandGuard AI
 
-## Project info
+Intelligent Land Verification System
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## About
 
-## How can I edit this code?
+LandGuard AI is a comprehensive system for land ownership verification and construction monitoring. It combines OCR technology for document processing, satellite imagery analysis, and blockchain-based record keeping to ensure regulatory compliance.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- **Document Processing**: OCR extraction from land ownership and building plan documents
+- **Compliance Checking**: Automated verification against regulatory requirements
+- **Satellite Monitoring**: Before/after image comparison for construction tracking
+- **Risk Assessment**: Composite scoring for unauthorized construction detection
+- **Blockchain Integration**: Immutable record keeping with SHA-256 hashing
+- **Admin Dashboard**: Comprehensive audit trail and reporting
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technologies Used
 
 This project is built with:
 
@@ -60,14 +25,66 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Getting Started
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Prerequisites
 
-## Can I connect a custom domain to my Lovable project?
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Yes, you can!
+### Installation
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sh
+# Step 1: Clone the repository
+git clone <YOUR_GIT_URL>
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# Step 2: Navigate to the project directory
+cd landguard-ai
+
+# Step 3: Install the necessary dependencies
+npm install
+
+# Step 4: Start the development server with auto-reloading and an instant preview
+npm run dev
+```
+
+### Development
+
+- Run `npm run dev` for development server
+- Run `npm run build` to build for production
+- Run `npm run test` to run tests
+- Run `npm run lint` to check code quality
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── ui/             # Reusable UI components
+│   └── *.tsx           # Feature components
+├── pages/              # Page components
+├── lib/                # Utility functions and data
+├── assets/             # Images and static assets
+└── hooks/              # Custom React hooks
+```
+
+## Deployment
+
+Build the project for production:
+
+```sh
+npm run build
+```
+
+The built files will be in the `dist/` directory, ready for deployment to any static hosting service.
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
